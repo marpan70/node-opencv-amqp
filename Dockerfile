@@ -1,9 +1,11 @@
 FROM siomiz/node-opencv
 
-RUN apt-get install -y vim
+RUN apt-get install -y vim amqp-tools telnet
 RUN npm install amqp-ts opencv
 
-WORKDIR /projects/opencv/detector
+RUN useradd -ms /bin/bash node
+USER node
+WORKDIR /home/node/projects/opencv/detector
 
 ADD detector_opencv_faces.js detector_opencv_faces.js
 
