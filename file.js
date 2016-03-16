@@ -5,9 +5,10 @@ var amqp = require('amqp-ts');
 // https://github.com/peterbraden/node-opencv
 // https://github.com/abreits/amqp-ts
 
-var connection = new amqp.Connection("amqp://192.168.99.100:32779");
-var exchange = connection.declareExchange("images", 'fanout');
-var queue = connection.declareQueue("opencv");
+var connection = new amqp.Connection(proces.env.RABBITMQ_HOST);
+var exchange = connection.declareExchange(proces.env.RABBITMQ_EXCHANGE, proces.env.RABBITMQ_EXCHANGE_TYPE);
+var queue = connection.declareQueue(proces.env.RABBITMQ_QUEUE);
+
 queue.bind(exchange);
 queue.activateConsumer((message) => {
     console.log("Message received: " + message.getContent().length);
