@@ -5,9 +5,9 @@ var amqp = require('amqp-ts');
 // https://github.com/peterbraden/node-opencv
 // https://github.com/abreits/amqp-ts
 
-var connection = new amqp.Connection(proces.env.RABBITMQ_HOST);
-var exchange = connection.declareExchange(proces.env.RABBITMQ_EXCHANGE, proces.env.RABBITMQ_EXCHANGE_TYPE);
-var queue = connection.declareQueue(proces.env.RABBITMQ_QUEUE);
+var connection = new amqp.Connection(process.env.RABBITMQ_HOST);
+var exchange = connection.declareExchange(process.env.RABBITMQ_EXCHANGE, process.env.RABBITMQ_EXCHANGE_TYPE);
+var queue = connection.declareQueue(process.env.RABBITMQ_QUEUE);
 
 queue.bind(exchange);
 queue.activateConsumer((message) => {
