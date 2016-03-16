@@ -1,5 +1,5 @@
 # node-opencv-amqp
-!(mona_lisa_detected_face)[out.jpg]
+![mona_lisa_detected_face](out.jpg)
 
 ```
 docker run -ti \
