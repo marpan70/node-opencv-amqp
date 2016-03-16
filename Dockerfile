@@ -1,2 +1,7 @@
 FROM siomiz/node-opencv
-RUN npm install amqp-ts
+
+RUN apt-get install vim
+RUN npm install amqp-ts opencv
+ADD file.js /file.js
+
+CMD bash
