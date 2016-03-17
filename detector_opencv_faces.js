@@ -3,9 +3,9 @@ var amqp = require('amqp-ts');
 var fs = require('fs');
 
 var Faces = function (count, faces, data) {
-    this._count = count
-    this._faces = faces;
-    this._data = data
+    this.count = count
+    this.faces = faces;
+    this.data = data
 };
 
 
@@ -13,20 +13,27 @@ var Faces = function (count, faces, data) {
 // https://github.com/abreits/amqp-ts
 
 var connection = new amqp.Connection(process.env.RABBITMQ_HOST);
+
 var images = connection.declareExchange(process.env.RABBITMQ_EXCHANGE_IMAGES, process.env.RABBITMQ_EXCHANGE_TYPE);
-var queue_images = connection.declareQueue(process.env.RABBITMQ_QUEUE);
+var queue_images = connection.declareQueue(process.env.RABBITMQ_QUEUE_IMAGES);
+queue_images.bind(images);
+
 
 var detected_faces = connection.declareExchange(process.env.RABBITMQ_EXCHANGE_FACES, process.env.RABBITMQ_EXCHANGE_TYPE);
-var queue_faces = connection.declareQueue('opencv.person_detector');
+var queue_faces = connection.declareQueue(process.env.RABBITMQ_QUEUE_FACES);
+queue_faces.bind(detected_faces);
 
-queue_images.bind(images);
+var outlined_faces = connection.declareExchange(process.env.RABBITMQ_EXCHANGE_FACES_OUTLINED, process.env.RABBITMQ_EXCHANGE_TYPE);
+var queue_outlined_faces = connection.declareQueue(process.env.RABBITMQ_QUEUE_FACES_OUTLINED);
+queue_outlined_faces.bind(outlined_faces)
+
 queue_images.activateConsumer((message) => {
   console.log("Message received: " + message.content.length);
-  // fs.writeFile('/tmp/in.jpg', message.content, 'binary');
+  fs.writeFile('/tmp/in.jpg', message.content, 'binary');
 
   // read image from rmq
   cv.readImage('/tmp/in.jpg', function(err, im){
-    console.log("Message received detect faces..");
+    console.log("Message "+im+" received detect faces..");
 
     im.detectObject(cv.FACE_CASCADE, {}, function(err, faces){
       console.log(faces);
@@ -39,22 +46,19 @@ queue_images.activateConsumer((message) => {
 
 },{rawMessage: true, noAck: true})
 
-queue_faces.bind(detected_faces);
 queue_faces.activateConsumer((message) => {
-  console.log("faces received: " + message.content.length);
-  var facesObject = Object.create(Faces, message.getContent());
-  console.log("faces received: " +  facesObject._count);
+  var facesObject = JSON.parse(message.content);
   if(typeof faces != 'undefined' && faces) {
-    fs.writeFile('/tmp/in.jpg', message.content, 'binary');
+    fs.writeFile('/tmp/in_2.jpg', message.content, 'binary');
 
     for (var i=0;i<faces.length; i++){
       var x = faces[i]
       im.ellipse(x.x + x.width/2, x.y + x.height/2, x.width/2, x.height/2);
     }
-    im.save('/tmp/out.jpg');
-    fs.readFile('/tmp/out.jpg', function read(err, data) {
-      var facesObject = new Faces(faces.length, faces, message.content.toString('base64'));
-      detected_faces.send(new amqp.Message(facesObject));
+    im.save('/tmp/out_2.jpg');
+    fs.readFile('/tmp/out_2.jpg', function read(err, data) {
+      var facesObject = new Faces(faces.length, faces, data.toString('base64'));
+      outlined_faces.send(new amqp.Message(facesObject));
     });
   }
 
