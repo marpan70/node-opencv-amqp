@@ -7,8 +7,8 @@ var fs = require('fs');
 // https://github.com/abreits/amqp-ts
 
 var connection = new amqp.Connection(process.env.RABBITMQ_HOST);
-var images = connection.declareExchange(process.env.RABBITMQ_EXCHANGE, process.env.RABBITMQ_EXCHANGE_TYPE);
-var faces = connection.declareExchange('faces', process.env.RABBITMQ_EXCHANGE_TYPE);
+var images = connection.declareExchange(process.env.RABBITMQ_EXCHANGE_IMAGES, process.env.RABBITMQ_EXCHANGE_TYPE);
+var faces = connection.declareExchange(process.env.RABBITMQ_EXCHANGE_FACES, process.env.RABBITMQ_EXCHANGE_TYPE);
 var opencv = connection.declareQueue(process.env.RABBITMQ_QUEUE);
 
 opencv.bind(images);
