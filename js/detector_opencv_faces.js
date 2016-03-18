@@ -7,6 +7,7 @@ var cv = require("opencv");
 var amqp = require("amqp-ts");
 var fs = require("fs");
 var uuid = require("node-uuid");
+var stream = require('stream');
 
 var Faces = function (count, faces, data) {
     this.uuid = uuid.v4();
@@ -38,9 +39,8 @@ queue_outlined_faces.bind(outlined_faces)
 // detect faces
 queue_images.activateConsumer((message) => {
   console.log("Message received: " + message.content.length);
-  fs.writeFileSync("/tmp/in.jpg", message.content, "binary");
 
-  cv.readImage("/tmp/in.jpg", function(err, im){
+  cv.readImage(message.content, function(err, im){
     im.detectObject(cv.FACE_CASCADE, {}, function(err, faces) {
       if(typeof faces != "undefined" && faces.length>0) {
         detected_faces.send(
@@ -49,41 +49,39 @@ queue_images.activateConsumer((message) => {
       }
     });
   });
-  fs.unlinkSync("/tmp/in.jpg");
 
 },{rawMessage: true, noAck: true})
 
 // outline faces
 queue_faces.activateConsumer((message) => {
+  // var bufferStream = new stream.PassThrough();
+  // bufferStream.end(message.content);
+  // bufferStream.pipe(process.stdout);
+
   var faces = JSON.parse(message.content);
-  var filenameIn = "/tmp/"+faces.uuid+"_in.jpg";
   var filenameOut = "/tmp/"+faces.uuid+"_out.jpg";
 
-  console.log("detected "+faces.faces.length+" faces");
-
-  fs.writeFileSync(filenameIn,
-    new Buffer(faces.data, "base64"), "binary");
-
-  cv.readImage(filenameIn, function(err, im_2) {
+  cv.readImage(new Buffer(faces.data, "base64"), function(err, im_2) {
     console.log("detected "+faces.faces.length+" faces");
 
     for (var i=0; i<faces.faces.length; i++){
       var face = faces.faces[i];
 
-      console.log("detected face["+(i+1)+"/"+faces.faces.length+"] on point("+face.x+","+face.y+"), going to outline..");
-      im_2.ellipse(face.x + face.width/2, face.y + face.height/2, face.width/2, face.height/2);
+      console.log(" - face["+(i+1)+"/"+faces.faces.length+"].("+face.x+","+face.y+")");
+      im_2.ellipse(face.x + face.width/2, face.y + face.height/2, face.width/2+2, face.height/2+2);
     }
     im_2.save(filenameOut);
   });
-  fs.unlinkSync(filenameIn);
 
   fs.readFile(filenameOut, function read(err, outfile_data) {
+    console.log( faces.uuid + ": detected "+faces.faces.length+" faces, image size is " + faces.data.length + ", outfile is " + outfile_data.length);
+
     outlined_faces.send(
       new amqp.Message(
         new Faces(faces.count, faces.faces, outfile_data.toString("base64"))));
   });
-  fs.unlinkSync(filenameOut);
 
+  // fs.unlinkSync(filenameOut);
 
 },{rawMessage: true, noAck: true})
 
