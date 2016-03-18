@@ -7,7 +7,8 @@ var cv = require("opencv");
 var amqp = require("amqp-ts");
 var fs = require("fs");
 var uuid = require("node-uuid");
-var stream = require('stream');
+var stream = require("stream");
+var _ = require("underscore");
 
 var Faces = function (count, faces, data) {
     this.uuid = uuid.v4();
@@ -38,29 +39,21 @@ queue_outlined_faces.bind(outlined_faces)
 
 // detect faces
 queue_images.activateConsumer((message) => {
-  console.log("Message received: " + message.content.length);
-
+  console.log("image received: " + message.content.length);
   cv.readImage(message.content, function(err, im){
     im.detectObject(cv.FACE_CASCADE, {}, function(err, faces) {
-      if(typeof faces != "undefined" && faces.length>0) {
+      if(!_.isUndefined(faces) && faces.length>0) {
         detected_faces.send(
           new amqp.Message(
             new Faces(faces.length, faces, message.content.toString("base64"))));
       }
     });
   });
-
 },{rawMessage: true, noAck: true})
 
 // outline faces
 queue_faces.activateConsumer((message) => {
-  // var bufferStream = new stream.PassThrough();
-  // bufferStream.end(message.content);
-  // bufferStream.pipe(process.stdout);
-
   var faces = JSON.parse(message.content);
-  var filenameOut = "/tmp/"+faces.uuid+"_out.jpg";
-
   cv.readImage(new Buffer(faces.data, "base64"), function(err, im_2) {
     console.log("detected "+faces.faces.length+" faces");
 
@@ -70,18 +63,10 @@ queue_faces.activateConsumer((message) => {
       console.log(" - face["+(i+1)+"/"+faces.faces.length+"].("+face.x+","+face.y+")");
       im_2.ellipse(face.x + face.width/2, face.y + face.height/2, face.width/2+2, face.height/2+2);
     }
-    im_2.save(filenameOut);
-  });
-
-  fs.readFile(filenameOut, function read(err, outfile_data) {
-    console.log( faces.uuid + ": detected "+faces.faces.length+" faces, image size is " + faces.data.length + ", outfile is " + outfile_data.length);
-
     outlined_faces.send(
       new amqp.Message(
-        new Faces(faces.count, faces.faces, outfile_data.toString("base64"))));
+        new Faces(faces.count, faces.faces, im_2.toBuffer().toString("base64"))));
   });
-
-  // fs.unlinkSync(filenameOut);
 
 },{rawMessage: true, noAck: true})
 
