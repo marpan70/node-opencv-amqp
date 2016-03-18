@@ -29,7 +29,8 @@ queue_outlined_faces.bind(outlined_faces)
 // detect faces
 queue_images.activateConsumer((message) => {
   console.log("Message received: " + message.content.length);
-  fs.writeFile('/tmp/in.jpg', message.content, 'binary');
+  // fs.unlinkSync('/tmp/in.jpg');
+  fs.writeFileSync('/tmp/in.jpg', message.content, 'binary');
 
   cv.readImage('/tmp/in.jpg', function(err, im){
     console.log("Message "+im+" received detect faces..");
@@ -48,8 +49,9 @@ queue_faces.activateConsumer((message) => {
   var facesObject = JSON.parse(message.content);
   if(typeof facesObject != 'undefined' && facesObject) {
     console.log(facesObject.count);
+    // fs.unlinkSync('/tmp/in_2.jpg');
+    fs.writeFileSync('/tmp/in_2.jpg', new Buffer(facesObject.data, 'base64'), 'binary');
 
-    fs.writeFile('/tmp/in_2.jpg', new Buffer(facesObject.data, 'base64'), 'binary');
     cv.readImage('/tmp/in_2.jpg', function(err, im_2){
       im_2.save('/tmp/x_2.jpg');
 
