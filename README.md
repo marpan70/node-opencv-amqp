@@ -22,7 +22,62 @@ And do the face-detection in OpenCV via nodejs
 ```
 node js/detector_opencv_faces.js
 ```
-The out/ folder will contain the detected faces
+The out/ folder will contain the detected faces.
+
+In RabbitMQ the 'faces' exchange contains a json representation of:
+ - the number of found images
+ - where they are in the image and
+ - the original image
+```
+{  
+   "uuid":"00ed5761-c0c6-43de-97f9-b4e35405a527",
+   "count":8,
+   "faces":[{  
+         "x":1115,
+         "y":461,
+         "width":49,
+         "height":49
+      },{  
+         "x":871,
+         "y":677,
+         "width":144,
+         "height":144
+      },{  
+         "x":692,
+         "y":719,
+         "width":138,
+         "height":138
+      },{  
+         "x":698,
+         "y":356,
+         "width":139,
+         "height":139
+      },{  
+         "x":1026,
+         "y":673,
+         "width":149,
+         "height":149
+      },{  
+         "x":1376,
+         "y":447,
+         "width":146,
+         "height":146
+      },{  
+         "x":619,
+         "y":526,
+         "width":140,
+         "height":140
+      },{  
+         "x":1158,
+         "y":551,
+         "width":149,
+         "height":149
+      }
+   ],
+   "data":"/9j/4AAQSkZJRgABAQEASABIAAD/4R24RXhpZgAATU0AKgAAAAgAEgEA.."
+]}
+```
+
 ```
 debug> var _ = require("underscore");
 debug> _.functions(cv);

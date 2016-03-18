@@ -54,14 +54,13 @@ queue_images.activateConsumer((message) => {
 // outline faces
 queue_faces.activateConsumer((message) => {
   var faces = JSON.parse(message.content);
-  cv.readImage(new Buffer(faces.data, "base64"), function(err, im_2) {
+  cv.readImage(new Buffer(faces.data, "base64"), function(err, im) {
     console.log("detected "+faces.faces.length+" faces");
 
     for (var i=0; i<faces.faces.length; i++){
       var face = faces.faces[i];
-
       console.log(" - face["+(i+1)+"/"+faces.faces.length+"].("+face.x+","+face.y+")");
-      im_2.ellipse(face.x + face.width/2, face.y + face.height/2, face.width/2+2, face.height/2+2);
+      im.ellipse(face.x + face.width/2, face.y + face.height/2, face.width/2+2, face.height/2+2);
     }
     outlined_faces.send(
       new amqp.Message(
