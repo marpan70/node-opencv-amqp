@@ -1,7 +1,16 @@
 FROM siomiz/node-opencv
 
 RUN apt-get install -y vim amqp-tools telnet
-RUN npm install -g amqp-ts opencv npm node-uuid underscore patrun bloomrun 
+
+# https://github.com/mhart/alpine-node/issues/26
+RUN npm install fs-extra \
+    && cp -r node_modules/* /usr/lib/node_modules/npm/node_modules \
+    && sed -i s/graceful-fs/fs-extra/g /usr/lib/node_modules/npm/lib/utils/rename.js \
+    && sed -i s/fs.rename/fs.move/g /usr/lib/node_modules/npm/lib/utils/rename.js \
+    && rm -rf node_modules \
+    && npm install -g npm@latest
+  
+RUN npm install -g amqp-ts opencv npm node-uuid underscore bloomrun 
 
 RUN useradd -ms /bin/bash node
 USER node
