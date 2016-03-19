@@ -4,9 +4,9 @@ RUN apt-get install -y vim amqp-tools telnet
 
 # https://github.com/mhart/alpine-node/issues/26
 RUN npm install fs-extra \
-    && cp -r node_modules/* /usr/lib/node_modules/npm/node_modules \
-    && sed -i s/graceful-fs/fs-extra/g /usr/lib/node_modules/npm/lib/utils/rename.js \
-    && sed -i s/fs.rename/fs.move/g /usr/lib/node_modules/npm/lib/utils/rename.js \
+    && cp -r node_modules/* /usr/local/lib/node_modules/npm/node_modules \
+    && sed -i s/graceful-fs/fs-extra/g /usr/local/lib/node_modules/npm/lib/utils/rename.js \
+    && sed -i s/fs.rename/fs.move/g /usr/local/lib/node_modules/npm/lib/utils/rename.js \
     && rm -rf node_modules \
     && npm install -g npm@latest
   
