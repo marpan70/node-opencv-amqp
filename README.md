@@ -2,6 +2,7 @@
 ![mona_lisa_detected_face](https://raw.githubusercontent.com/marpan70/node-opencv-amqp/master/images/mona_lisa_detected_face.jpg)
 ![multi_1](https://raw.githubusercontent.com/marpan70/node-opencv-amqp/master/images/71ee3113-6417-4bb7-9bd3-91ce073c75e5.jpg)
 ![multi_2](https://raw.githubusercontent.com/marpan70/node-opencv-amqp/master/images/5c773a2e-6331-4707-bb7a-e17fb0a2ea4f.jpg)
+![ga2](https://ga-beacon.appspot.com/UA-1978247-19/image)
 
 ## TO TEST
 Start the container in interactive mode
