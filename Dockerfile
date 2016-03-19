@@ -10,7 +10,7 @@ RUN npm install fs-extra \
     && rm -rf node_modules \
     && npm install -g npm@latest
   
-RUN npm install -g amqp-ts opencv npm node-uuid underscore bloomrun 
+RUN npm install amqp-ts opencv npm node-uuid underscore bloomrun 
 
 RUN useradd -ms /bin/bash node
 USER node
