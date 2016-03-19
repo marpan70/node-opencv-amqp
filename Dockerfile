@@ -1,7 +1,7 @@
 FROM siomiz/node-opencv
 
 RUN apt-get install -y vim amqp-tools telnet
-RUN npm install -g --save amqp-ts opencv npm node-uuid underscore patrun bloomrun 
+RUN npm install -g amqp-ts opencv npm node-uuid underscore patrun bloomrun 
 
 RUN useradd -ms /bin/bash node
 USER node
